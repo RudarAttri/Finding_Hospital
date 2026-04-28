@@ -1,12 +1,13 @@
 package org.example;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.io.FileHandler;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.io.File;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -108,8 +109,6 @@ public class App {
         ArrayList<String> hospitalNames = new ArrayList<>();
 
         try {
-            // From screenshot: structure is ol > li > div.c-estb-card
-            // name link is inside div.col-2 (NOT col-1, col-1 is the image)
             List<WebElement> hospitalItems = driver.findElements(
                     By.xpath("//*[@id=\"container\"]/div/div[3]/div/div[1]//ol//li[.//div[contains(@class,'c-estb-card')]]"));
 
@@ -123,7 +122,6 @@ public class App {
                     js.executeScript("arguments[0].scrollIntoView({behavior:'smooth', block:'center'});", item);
                     Thread.sleep(500);
 
-                    // col-2 contains the hospital name anchor tag
                     WebElement nameLink = item.findElement(
                             By.xpath(".//div[contains(@class,'c-estb-card')]" +
                                     "//div[contains(@class,'col-2')]//a"));
@@ -145,6 +143,13 @@ public class App {
 
         // Step 8: ArrayList to store matching hospitals
         ArrayList<String> matchingHospitals = new ArrayList<>();
+
+        // Create screenshots folder once before the loop
+        File screenshotDir = new File("screenshots");
+        if (!screenshotDir.exists()) {
+            screenshotDir.mkdirs();
+            System.out.println("Screenshots folder created at: " + screenshotDir.getAbsolutePath());
+        }
 
         System.out.println("\n--- Navigating into each of top 5 hospitals ---\n");
 
@@ -170,8 +175,20 @@ public class App {
                         By.xpath("//h1")));
                 Thread.sleep(1000);
 
+                // Take screenshot with unique name per hospital
+                // Format: Hospital_1_Manipal_Hospital.png
+                try {
+                    String safeName = hospitalName.replaceAll("[^a-zA-Z0-9]", "_");
+                    File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+                    File destination = Paths.get("screenshots",
+                            "Hospital_" + (i + 1) + "_" + safeName + ".png").toFile();
+                    FileHandler.copy(screenshot, destination);
+                    System.out.println("   Screenshot saved: " + destination.getAbsolutePath());
+                } catch (Exception e) {
+                    System.out.println("   Screenshot failed: " + e.getMessage());
+                }
+
                 // --- Check Rating ---
-                // From screenshot: span class="common__star-rating__value" text = "4.0"
                 try {
                     List<WebElement> ratingElements = driver.findElements(
                             By.xpath("//span[contains(@class,'common__star-rating__value')]"));
@@ -186,8 +203,6 @@ public class App {
                 }
 
                 // --- Check Open 24x7 ---
-                // From screenshot: p class="c-profile--details u-spacer--bottom u-green-text"
-                // text = "Open 24 x 7"
                 try {
                     List<WebElement> open24x7Elements = driver.findElements(
                             By.xpath("//p[contains(@class,'u-green-text') " +
@@ -228,7 +243,6 @@ public class App {
                 Thread.sleep(1000);
                 System.out.println("   Back on listing page\n");
             } catch (Exception e) {
-                // if navigate back fails use saved URL
                 driver.get(listingPageUrl);
                 Thread.sleep(2000);
                 System.out.println("   Used URL to go back to listing page\n");
@@ -256,3 +270,4 @@ public class App {
         driver.quit();
     }
 }
+
