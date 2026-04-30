@@ -114,7 +114,7 @@ public class App {
 
             System.out.println("Total hospital items found: " + hospitalItems.size());
 
-            int limit = Math.min(5, hospitalItems.size());
+            int limit = Math.min(20, hospitalItems.size());
 
             for (int i = 0; i < limit; i++) {
                 try {
@@ -145,11 +145,11 @@ public class App {
         ArrayList<String> matchingHospitals = new ArrayList<>();
 
         // Create screenshots folder once before the loop
-        File screenshotDir = new File("screenshots");
-        if (!screenshotDir.exists()) {
-            screenshotDir.mkdirs();
-            System.out.println("Screenshots folder created at: " + screenshotDir.getAbsolutePath());
-        }
+//        File screenshotDir = new File("screenshots");
+//        if (!screenshotDir.exists()) {
+//            screenshotDir.mkdirs();
+//            System.out.println("Screenshots folder created at: " + screenshotDir.getAbsolutePath());
+//        }
 
         System.out.println("\n--- Navigating into each of top 5 hospitals ---\n");
 
@@ -177,16 +177,16 @@ public class App {
 
                 // Take screenshot with unique name per hospital
                 // Format: Hospital_1_Manipal_Hospital.png
-                try {
-                    String safeName = hospitalName.replaceAll("[^a-zA-Z0-9]", "_");
-                    File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-                    File destination = Paths.get("screenshots",
-                            "Hospital_" + (i + 1) + "_" + safeName + ".png").toFile();
-                    FileHandler.copy(screenshot, destination);
-                    System.out.println("   Screenshot saved: " + destination.getAbsolutePath());
-                } catch (Exception e) {
-                    System.out.println("   Screenshot failed: " + e.getMessage());
-                }
+//                try {
+//                    String safeName = hospitalName.replaceAll("[^a-zA-Z0-9]", "_");
+//                    File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+//                    File destination = Paths.get("screenshots",
+//                            "Hospital_" + (i + 1) + "_" + safeName + ".png").toFile();
+//                    FileHandler.copy(screenshot, destination);
+//                    System.out.println("   Screenshot saved: " + destination.getAbsolutePath());
+//                } catch (Exception e) {
+//                    System.out.println("   Screenshot failed: " + e.getMessage());
+//                }
 
                 // --- Check Rating ---
                 try {
