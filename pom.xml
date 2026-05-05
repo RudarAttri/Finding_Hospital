@@ -5,24 +5,19 @@
              http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-
   <groupId>org.example</groupId>
   <artifactId>FinalProject</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
-
   <name>FinalProject</name>
   <url>http://maven.apache.org</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-    <!-- Java 17 enforced via all three properties -->
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <maven.compiler.release>17</maven.compiler.release>
 
-    <!-- Centralised version management -->
     <selenium.version>4.41.0</selenium.version>
     <cucumber.version>7.15.0</cucumber.version>
     <junit.version>4.13.2</junit.version>
@@ -35,8 +30,6 @@
 
   <build>
     <plugins>
-
-      <!-- Compiler locked to Java 17 — fixes "switch rules not supported in source 8" -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -48,7 +41,7 @@
         </configuration>
       </plugin>
 
-      <!-- Surefire pointed at TestRunner so Cucumber runs via mvn test -->
+      <!-- DEFAULT behavior preserved: `mvn test` still runs Cucumber TestRunner -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -59,10 +52,8 @@
           </includes>
         </configuration>
       </plugin>
-
     </plugins>
 
-    <!-- Feature files on the test classpath -->
     <testResources>
       <testResource>
         <directory>src/test/resources</directory>
@@ -73,47 +64,82 @@
     </testResources>
   </build>
 
-  <dependencies>
+  <!-- ─── Profile: ONLY activates when you run `mvn test -Ptestng` ─────────── -->
+  <profiles>
+    <profile>
+      <id>testng</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>3.5.5</version>
+            <configuration>
+              <suiteXmlFiles>
+                <suiteXmlFile>Testng.xml</suiteXmlFile>
+              </suiteXmlFiles>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
-    <!-- ── Selenium ──────────────────────────────────────────────────── -->
+  <dependencies>
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>selenium-java</artifactId>
       <version>${selenium.version}</version>
     </dependency>
-
-    <!-- ── Cucumber ──────────────────────────────────────────────────── -->
     <dependency>
       <groupId>io.cucumber</groupId>
       <artifactId>cucumber-java</artifactId>
       <version>${cucumber.version}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>io.cucumber</groupId>
       <artifactId>cucumber-junit</artifactId>
       <version>${cucumber.version}</version>
       <scope>test</scope>
     </dependency>
-
-    <!-- ── JUnit 4 (duplicate 3.8.1 removed — only one JUnit declaration) -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
-
-    <!-- ── TestNG ─────────────────────────────────────────────────────── -->
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
       <version>${testng.version}</version>
       <scope>test</scope>
     </dependency>
-
-    <!-- ── Apache POI (Excel read/write) ─────────────────────────────── -->
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi</artifactId>
+      <version>${poi.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>${poi.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>${commons.io.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${commons.lang3.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.apache.poi</groupId>
       <artifactId>poi</artifactId>
@@ -125,28 +151,6 @@
       <artifactId>poi-ooxml</artifactId>
       <version>${poi.version}</version>
     </dependency>
-
-    <!-- ── Log4j ──────────────────────────────────────────────────────── -->
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-core</artifactId>
-      <version>${log4j.version}</version>
-    </dependency>
-
-    <!-- ── Commons IO ─────────────────────────────────────────────────── -->
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>${commons.io.version}</version>
-    </dependency>
-
-    <!-- ── Commons Lang3 ──────────────────────────────────────────────── -->
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <version>${commons.lang3.version}</version>
-    </dependency>
-
   </dependencies>
 
 </project>
