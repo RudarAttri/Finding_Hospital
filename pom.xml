@@ -1,5 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.example</groupId>
@@ -12,110 +16,137 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- Java 17 enforced via all three properties -->
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <maven.compiler.release>17</maven.compiler.release>
+
+    <!-- Centralised version management -->
+    <selenium.version>4.41.0</selenium.version>
+    <cucumber.version>7.15.0</cucumber.version>
+    <junit.version>4.13.2</junit.version>
+    <testng.version>7.12.0</testng.version>
+    <poi.version>5.5.1</poi.version>
+    <log4j.version>3.0.0-beta3</log4j.version>
+    <commons.io.version>2.21.0</commons.io.version>
+    <commons.lang3.version>3.20.0</commons.lang3.version>
   </properties>
 
   <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.15.0</version>
-        </plugin>
+    <plugins>
 
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.5.5</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
+      <!-- Compiler locked to Java 17 — fixes "switch rules not supported in source 8" -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.15.0</version>
+        <configuration>
+          <source>17</source>
+          <target>17</target>
+          <release>17</release>
+        </configuration>
+      </plugin>
+
+      <!-- Surefire pointed at TestRunner so Cucumber runs via mvn test -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.5</version>
+        <configuration>
+          <includes>
+            <include>**/TestRunner.java</include>
+          </includes>
+        </configuration>
+      </plugin>
+
+    </plugins>
+
+    <!-- Feature files on the test classpath -->
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+      </testResource>
+      <testResource>
+        <directory>Features</directory>
+      </testResource>
+    </testResources>
   </build>
 
   <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
 
-    <!-- Source: https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java -->
+    <!-- ── Selenium ──────────────────────────────────────────────────── -->
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>selenium-java</artifactId>
-      <version>4.41.0</version>
-      <scope>compile</scope>
+      <version>${selenium.version}</version>
     </dependency>
 
-
-    <!-- Source: https://mvnrepository.com/artifact/org.apache.poi/poi -->
-    <dependency>
-      <groupId>org.apache.poi</groupId>
-      <artifactId>poi</artifactId>
-      <version>5.5.1</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <!-- Source: https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
-    <dependency>
-      <groupId>org.apache.poi</groupId>
-      <artifactId>poi-ooxml</artifactId>
-      <version>5.5.1</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <version>7.12.0</version>
-      <scope>test</scope>
-    </dependency>
-
+    <!-- ── Cucumber ──────────────────────────────────────────────────── -->
     <dependency>
       <groupId>io.cucumber</groupId>
       <artifactId>cucumber-java</artifactId>
-      <version>7.15.0</version>
+      <version>${cucumber.version}</version>
       <scope>test</scope>
     </dependency>
 
-    <!-- Cucumber + JUnit integration -->
     <dependency>
       <groupId>io.cucumber</groupId>
       <artifactId>cucumber-junit</artifactId>
-      <version>7.15.0</version>
+      <version>${cucumber.version}</version>
       <scope>test</scope>
     </dependency>
 
-    <!-- JUnit -->
+    <!-- ── JUnit 4 (duplicate 3.8.1 removed — only one JUnit declaration) -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.13.2</version>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
 
-    <!-- Source: https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
+    <!-- ── TestNG ─────────────────────────────────────────────────────── -->
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>${testng.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- ── Apache POI (Excel read/write) ─────────────────────────────── -->
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi</artifactId>
+      <version>${poi.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>${poi.version}</version>
+    </dependency>
+
+    <!-- ── Log4j ──────────────────────────────────────────────────────── -->
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
-      <version>3.0.0-beta3</version>
-      <scope>compile</scope>
+      <version>${log4j.version}</version>
     </dependency>
 
-    <!-- Source: https://mvnrepository.com/artifact/commons-io/commons-io -->
+    <!-- ── Commons IO ─────────────────────────────────────────────────── -->
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.21.0</version>
-      <scope>compile</scope>
+      <version>${commons.io.version}</version>
     </dependency>
 
-    <!-- Source: https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+    <!-- ── Commons Lang3 ──────────────────────────────────────────────── -->
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.20.0</version>
-      <scope>compile</scope>
+      <version>${commons.lang3.version}</version>
     </dependency>
+
   </dependencies>
+
 </project>
