@@ -1,3 +1,4 @@
+### Maven ###
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
@@ -37,3 +38,25 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Windows ###
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+### Test artifacts (regenerated every run — don't commit) ###
+Reports/
+screenshots/
+test-output/
+Logs/
+*.log
+
+### Excel temp / lock files ###
+~$*.xlsx
+~$*.xls
+~$*.docx
+
+### Selenium / WebDriver ###
+chromedriver*
+geckodriver*
+*.dmp

@@ -11,23 +11,20 @@ import utilities.ScreenshotHelper;
 /**
  * TestNG data-driven test for the Corporate Wellness "Schedule a Demo" form.
  *
- * ActualStatus convention (matches ExpectedResult column):
- *   PASS = the form accepted the user data (no warning shown)
- *   FAIL = the form rejected the user data (warning/error shown)
+ * STRATEGY:
+ *   The submit button itself is the source of truth.
+ *   Practo's form keeps the button DISABLED until all fields are valid.
  *
- * For VALID rows  → ExpectedResult = PASS → test asserts ActualStatus = PASS
- * For INVALID rows → ExpectedResult = FAIL → test asserts ActualStatus = FAIL
+ *   • VALID data   → button gets enabled by the form's own validation
+ *   • INVALID data → button stays disabled
  *
- * Excel columns (0-indexed):
- *   0 = TestCaseID
- *   1 = TestType        (VALID / INVALID)
- *   2 = Name
- *   3 = Email
- *   4 = Phone
- *   5 = Company
- *   6 = Employees
- *   7 = ExpectedResult  (PASS / FAIL)
- *   8 = ActualStatus    ← updated by this test (PASS / FAIL)
+ *   We do NOT click the button or look for popups, because:
+ *     - reCAPTCHA appears after click and confuses success detection
+ *     - Form validation on the button is the most reliable signal
+ *
+ * ActualStatus convention:
+ *   PASS = button enabled (form considered the data valid)
+ *   FAIL = button disabled (form considered the data invalid)
  */
 public class CorporateWellnessTest {
 
@@ -40,17 +37,11 @@ public class CorporateWellnessTest {
 
     private final ExcelUtils excel = new ExcelUtils(EXCEL_PATH, SHEET_NAME);
 
-    // =========================================================================
-    //  DATA PROVIDER
-    // =========================================================================
     @DataProvider(name = "registrationData")
     public Object[][] getRegistrationData() throws Exception {
         return excel.getSheetData();
     }
 
-    // =========================================================================
-    //  SETUP / TEARDOWN
-    // =========================================================================
     @BeforeMethod
     public void setUp() {
         DriverFactory.initDriver();
@@ -62,9 +53,6 @@ public class CorporateWellnessTest {
         DriverFactory.quitDriver();
     }
 
-    // =========================================================================
-    //  TEST — runs once per Excel row
-    // =========================================================================
     @Test(dataProvider = "registrationData",
             description  = "Corporate Wellness — data-driven via Apache POI")
     public void testCorporateWellnessRegistration(
@@ -81,72 +69,64 @@ public class CorporateWellnessTest {
         System.out.println("\n========================================");
         System.out.println(testId + " | Type: " + testType
                 + " | Expected: " + expectedResult);
-        System.out.println("Data → " + name + " | " + email
-                + " | " + phone + " | " + company + " | " + employees);
+        System.out.println("Data → name='" + name + "' | email='" + email
+                + "' | phone='" + phone + "' | company='" + company
+                + "' | employees='" + employees + "'");
         System.out.println("========================================");
 
-        // ActualStatus = "PASS" means form accepted, "FAIL" means form rejected
         String actualStatus = "FAIL";
 
         try {
-            // Step 1 — open Corporate Wellness page
+            // Open page
             wellnessPage.navigateToCorporateWellness();
 
-            // Step 2 — fill the form
+            // Fill form
             wellnessPage.enterInvalidName(name);
             wellnessPage.enterInvalidEmail(email);
             wellnessPage.enterInvalidPhone(phone);
             wellnessPage.enterCompany(company);
             wellnessPage.enterInvalidEmployeeCount(employees);
 
-            // Step 3 — screenshot of filled form
             ScreenshotHelper.takeScreenshot(testId + "_" + testType + "_FormFilled");
 
-            // Step 4 — click Schedule
-            wellnessPage.clickSchedule();
+            // ─── KEY: button state IS the truth — don't click, don't look for popups ─
+            boolean buttonEnabled = wellnessPage.isScheduleButtonEnabled();
+            System.out.println("Schedule button enabled: " + buttonEnabled);
 
-            // Step 5 — capture warning/alert
-            String warning = wellnessPage.captureAlertMessage();
-            System.out.println("Warning message: " + warning);
+            //   Button enabled  → form considered the data valid     → PASS
+            //   Button disabled → form considered the data invalid   → FAIL
+            actualStatus = buttonEnabled ? "PASS" : "FAIL";
 
-            // Step 6 — screenshot after submit
-            ScreenshotHelper.takeScreenshot(testId + "_" + testType + "_AfterSubmit");
+            // We DON'T click the button. Why?
+            //   - For VALID rows: clicking triggers reCAPTCHA which confuses detection
+            //                     and could spam the actual Practo backend
+            //   - For INVALID rows: button is disabled, click does nothing anyway
+            // The button state alone tells us whether the form's validation passed.
 
-            // Step 7 — determine the form's actual outcome
-            boolean formRejected = warning != null
-                    && !warning.isEmpty()
-                    && !warning.equalsIgnoreCase("No error message found");
+            ScreenshotHelper.takeScreenshot(testId + "_" + testType + "_AfterValidation");
 
-            //  PASS = form accepted (no warning)
-            //  FAIL = form rejected (warning shown)
-            actualStatus = formRejected ? "FAIL" : "PASS";
+            System.out.println("──── DEBUG ────");
+            System.out.println("  Button enabled? " + buttonEnabled);
+            System.out.println("  ActualStatus: " + actualStatus);
+            System.out.println("───────────────");
 
-            System.out.println(testId + " → ActualStatus = " + actualStatus
-                    + " (Expected: " + expectedResult + ")");
+            System.out.println(testId + " | Expected: " + expectedResult
+                    + " | Actual: " + actualStatus
+                    + " | Match: " + actualStatus.equalsIgnoreCase(expectedResult));
 
-            // Step 8 — verify expected matches actual
-            if ("VALID".equalsIgnoreCase(testType)) {
-                Assert.assertEquals(actualStatus, "PASS",
-                        testId + " — Valid data should be accepted (PASS), but got: "
-                                + actualStatus + ". Warning: " + warning);
-            } else {
-                Assert.assertEquals(actualStatus, "FAIL",
-                        testId + " — Invalid data should be rejected (FAIL), but got: "
-                                + actualStatus);
-            }
+            // Verify expected matches actual
+            Assert.assertEquals(actualStatus, expectedResult.toUpperCase(),
+                    testId + " — Expected " + expectedResult
+                            + " but form behavior was " + actualStatus);
 
         } catch (AssertionError ae) {
             ScreenshotHelper.takeScreenshot(testId + "_FAILED");
-            // Don't change actualStatus — it already reflects what happened
             throw ae;
-
         } catch (Exception e) {
             ScreenshotHelper.takeScreenshot(testId + "_ERROR");
             actualStatus = "ERROR";
             throw new RuntimeException(e);
-
         } finally {
-            // Step 9 — write actual status to Excel
             excel.writeStatusByTestCaseId(testId, actualStatus, COL_ID, COL_STATUS);
         }
     }

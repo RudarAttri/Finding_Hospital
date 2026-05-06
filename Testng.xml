@@ -5,6 +5,7 @@
     TestNG suite for Corporate Wellness data-driven tests.
     Reads test data from   : TestData/CorporateWellnessData.xlsx
     Writes status back into: same Excel (ActualStatus column)
+    Generates Extent HTML  : Reports/Extent/ExtentReport_*.html
 
     Coexists with the BDD/Cucumber framework:
       • Cucumber tests run via TestRunner.java (untouched)
@@ -12,6 +13,11 @@
       • Both use the same DriverFactory (ThreadLocal) — no conflict
 -->
 <suite name="CorporateWellnessSuite" verbose="2">
+
+    <!-- ── Listeners — activates ExtentReports automatically ──────────────── -->
+    <listeners>
+        <listener class-name="utilities.ExtentTestListener"/>
+    </listeners>
 
     <test name="CorporateWellnessRegistrationTests">
         <classes>

@@ -11,19 +11,15 @@ import java.util.List;
 /**
  * Page Object for the Practo Corporate Wellness "Schedule a Demo" page.
  *
- * Navigation flow (mimics real user):
- *   1. Open Practo homepage
- *   2. Click/hover "For Corporates" in top nav
- *   3. Click "Health & Wellness Plans" link
- *   4. Land on the corporate form
+ * Form behavior:
+ *   • VALID data   → Submit button enabled → click → reCAPTCHA → success message
+ *   • INVALID data → Submit button stays DISABLED → no click possible
  *
- * Real form field IDs (from the actual page):
- *   #name, #organizationName, #contactNumber, #officialEmailId,
- *   #organizationSize (select), #interestedIn (select)
+ * Important: reCAPTCHA iframe must NOT be confused with success popup.
  */
 public class CorporateWellnessPage extends BasePage {
 
-    // ── Homepage navigation locators ─────────────────────────────────────────
+    // ── Homepage navigation ──────────────────────────────────────────────────
     @FindBy(xpath = "//span[contains(@class,'nav-interact') " +
             "and contains(text(),'For Corporates')]" +
             "/ancestor::div[contains(@class,'dropdown-toggle')] | " +
@@ -35,7 +31,7 @@ public class CorporateWellnessPage extends BasePage {
             "or contains(text(),'Wellness Plans')]")
     private WebElement healthWellnessLink;
 
-    // ── Form field locators (real IDs from the page) ─────────────────────────
+    // ── Form fields ──────────────────────────────────────────────────────────
     @FindBy(id = "name")
     private WebElement nameField;
 
@@ -59,53 +55,62 @@ public class CorporateWellnessPage extends BasePage {
             "or contains(text(),'Submit')]")
     private WebElement scheduleButton;
 
+    // Success message / thank-you popup ONLY (not reCAPTCHA)
+    // Looks for explicit success keywords in non-recaptcha elements
+    private static final By SUCCESS_MESSAGE = By.xpath(
+            "//*[" +
+                    "(contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ'," +
+                    "'abcdefghijklmnopqrstuvwxyz'),'thank you') " +
+                    "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ'," +
+                    "'abcdefghijklmnopqrstuvwxyz'),'we will get back') " +
+                    "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ'," +
+                    "'abcdefghijklmnopqrstuvwxyz'),'submitted successfully') " +
+                    "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ'," +
+                    "'abcdefghijklmnopqrstuvwxyz'),'request received') " +
+                    "or contains(translate(text(),'ABCDEFGHIJKLMNOPQRSTUVWXYZ'," +
+                    "'abcdefghijklmnopqrstuvwxyz'),'demo has been scheduled')" +
+                    ") " +
+                    "and not(ancestor::iframe) " +
+                    "and not(contains(@id,'recaptcha')) " +
+                    "and not(contains(@class,'recaptcha')) " +
+                    "and not(contains(@class,'g-recaptcha'))" +
+                    "]");
+
     private static final By INLINE_ERROR = By.xpath(
             "//*[contains(@class,'error') or contains(@class,'warning') " +
                     "or contains(@class,'invalid') or contains(@class,'u-red-text') " +
                     "or contains(@class,'corporate-form__error')]");
 
     // ── Navigation ────────────────────────────────────────────────────────────
-    /**
-     * Navigates via homepage menu (real user flow):
-     * Practo home → For Corporates → Health & Wellness Plans
-     */
     public void navigateToCorporateWellness() {
-        // Step 1: Go to Practo homepage
         driver.get("https://www.practo.com");
         sleep(3000);
         System.out.println("Homepage opened: " + driver.getCurrentUrl());
 
-        // Step 2: Click "For Corporates" dropdown in top nav
         try {
             WaitHelper.waitForVisibilityOfElement(forCorporatesMenu);
             scrollTo(forCorporatesMenu);
             sleep(500);
             jsClick(forCorporatesMenu);
-            System.out.println("Clicked 'For Corporates' menu");
             sleep(1500);
         } catch (Exception e) {
             System.out.println("'For Corporates' menu issue: " + e.getMessage());
         }
 
-        // Step 3: Click "Health & Wellness Plans" link
         try {
             WaitHelper.waitForVisibilityOfElement(healthWellnessLink);
             scrollTo(healthWellnessLink);
             sleep(500);
             jsClick(healthWellnessLink);
-            System.out.println("Clicked 'Health & Wellness Plans' link");
             sleep(3000);
         } catch (Exception e) {
-            System.out.println("Wellness link issue, falling back to direct URL: "
-                    + e.getMessage());
+            System.out.println("Falling back to direct URL: " + e.getMessage());
             driver.get("https://www.practo.com/plus/corporate");
             sleep(3000);
         }
 
-        // Step 4: Wait for the form to load
         WaitHelper.waitForVisibilityOfElement(nameField);
-        System.out.println("Corporate Wellness form loaded. URL: "
-                + driver.getCurrentUrl());
+        System.out.println("Form loaded. URL: " + driver.getCurrentUrl());
     }
 
     // ── Field actions ─────────────────────────────────────────────────────────
@@ -114,7 +119,6 @@ public class CorporateWellnessPage extends BasePage {
         scrollTo(nameField);
         nameField.clear();
         if (v != null && !v.isEmpty()) nameField.sendKeys(v);
-        System.out.println("Entered name: " + v);
     }
 
     public void enterInvalidEmail(String v) {
@@ -122,7 +126,6 @@ public class CorporateWellnessPage extends BasePage {
         scrollTo(emailField);
         emailField.clear();
         if (v != null && !v.isEmpty()) emailField.sendKeys(v);
-        System.out.println("Entered email: " + v);
     }
 
     public void enterInvalidPhone(String v) {
@@ -131,7 +134,6 @@ public class CorporateWellnessPage extends BasePage {
             scrollTo(phoneField);
             phoneField.clear();
             if (v != null && !v.isEmpty()) phoneField.sendKeys(v);
-            System.out.println("Entered phone: " + v);
         } catch (Exception e) {
             System.out.println("Phone field issue: " + e.getMessage());
         }
@@ -143,17 +145,11 @@ public class CorporateWellnessPage extends BasePage {
             scrollTo(orgNameField);
             orgNameField.clear();
             if (v != null && !v.isEmpty()) orgNameField.sendKeys(v);
-            System.out.println("Entered organization: " + v);
         } catch (Exception e) {
-            System.out.println("Organization field issue: " + e.getMessage());
+            System.out.println("Org field issue: " + e.getMessage());
         }
     }
 
-    /**
-     * Selects org size + interested-in dropdowns.
-     * Index 0 (or empty) = leave blank → invalid.
-     * Index > 0 = pick first real option (so VALID rows can submit).
-     */
     public void enterInvalidEmployeeCount(String v) {
         try {
             WaitHelper.waitForVisibilityOfElement(orgSizeDropdown);
@@ -165,22 +161,12 @@ public class CorporateWellnessPage extends BasePage {
                 return;
             }
 
-            // Organization Size
             Select s = new Select(orgSizeDropdown);
-            if (idx < s.getOptions().size()) {
-                s.selectByIndex(idx);
-                System.out.println("Selected org size: "
-                        + s.getFirstSelectedOption().getText());
-            }
+            if (idx < s.getOptions().size()) s.selectByIndex(idx);
 
-            // Interested In
             WaitHelper.waitForVisibilityOfElement(interestedInDropdown);
             Select s2 = new Select(interestedInDropdown);
-            if (idx < s2.getOptions().size()) {
-                s2.selectByIndex(idx);
-                System.out.println("Selected interested-in: "
-                        + s2.getFirstSelectedOption().getText());
-            }
+            if (idx < s2.getOptions().size()) s2.selectByIndex(idx);
         } catch (Exception e) {
             System.out.println("Dropdown issue: " + e.getMessage());
         }
@@ -205,27 +191,101 @@ public class CorporateWellnessPage extends BasePage {
             jsClick(scheduleButton);
             System.out.println("Clicked schedule button");
         } catch (Exception e) {
-            System.out.println("Schedule click failed (likely disabled): " + e.getMessage());
+            System.out.println("Schedule click failed: " + e.getMessage());
         }
-        sleep(2000);
+        sleep(2500);
     }
 
-    // ── Error capture ─────────────────────────────────────────────────────────
+    /**
+     * Returns true if Schedule button is enabled (form is valid).
+     */
+    public boolean isScheduleButtonEnabled() {
+        try {
+            WaitHelper.waitForVisibilityOfElement(scheduleButton);
+            scrollTo(scheduleButton);
+            sleep(500);
+
+            String aria = scheduleButton.getAttribute("aria-disabled");
+            String cls  = scheduleButton.getAttribute("class");
+
+            boolean nativeEnabled = scheduleButton.isEnabled();
+            boolean ariaDisabled  = "true".equalsIgnoreCase(aria);
+            boolean classDisabled = cls != null && cls.toLowerCase().contains("disabled");
+
+            boolean enabled = nativeEnabled && !ariaDisabled && !classDisabled;
+
+            System.out.println("Button state → enabled=" + nativeEnabled
+                    + " | aria-disabled=" + aria
+                    + " | final=" + enabled);
+            return enabled;
+        } catch (Exception e) {
+            System.out.println("Button state check failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Returns true ONLY if a real success/thank-you message is shown.
+     * Explicitly excludes reCAPTCHA iframes and elements.
+     */
+    public boolean isSuccessMessageDisplayed() {
+        sleep(2000); // give page time to render
+
+        // First check JS alert
+        try {
+            WaitHelper.waitForAlert();
+            Alert alert = driver.switchTo().alert();
+            String msg = alert.getText();
+            alert.accept();
+            System.out.println("JS Alert (success): " + msg);
+            // Only treat as success if alert mentions success keywords
+            String lower = msg.toLowerCase();
+            return lower.contains("thank") || lower.contains("success")
+                    || lower.contains("received") || lower.contains("submitted");
+        } catch (Exception ignored) {}
+
+        // Check for visible success text on page (excluding reCAPTCHA)
+        try {
+            List<WebElement> hits = driver.findElements(SUCCESS_MESSAGE);
+            for (WebElement el : hits) {
+                if (!el.isDisplayed()) continue;
+
+                // Double-check this isn't a reCAPTCHA element
+                String tagName = el.getTagName();
+                String id      = el.getAttribute("id");
+                String cls     = el.getAttribute("class");
+
+                if ("iframe".equalsIgnoreCase(tagName)) continue;
+                if (id != null && id.toLowerCase().contains("recaptcha")) continue;
+                if (cls != null && cls.toLowerCase().contains("recaptcha")) continue;
+                if (cls != null && cls.toLowerCase().contains("g-recaptcha")) continue;
+
+                String text = el.getText().trim();
+                if (!text.isEmpty()) {
+                    System.out.println("Success message found: " + text);
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Success-message check failed: " + e.getMessage());
+        }
+
+        System.out.println("No success message detected");
+        return false;
+    }
+
+    // ── Error capture (kept for BDD compatibility) ───────────────────────────
     public String captureAlertMessage() {
-        // 1. JS alert?
         try {
             WaitHelper.waitForAlert();
             Alert alert = driver.switchTo().alert();
             String message = alert.getText();
-            System.out.println("JS Alert: " + message);
             alert.accept();
             return message;
         } catch (Exception e) {
-            // 2. Inline error?
             String inline = captureInlineErrorMessage();
             if (!inline.equals("No error message found")) return inline;
 
-            // 3. Submit button disabled = silent rejection
             try {
                 if (!scheduleButton.isEnabled()) {
                     return "Submit button disabled — form rejected invalid input";
@@ -247,10 +307,7 @@ public class CorporateWellnessPage extends BasePage {
             List<WebElement> errors = driver.findElements(INLINE_ERROR);
             for (WebElement err : errors) {
                 String text = err.getText().trim();
-                if (!text.isEmpty()) {
-                    System.out.println("Inline error: " + text);
-                    return text;
-                }
+                if (!text.isEmpty()) return text;
             }
         } catch (Exception e) {
             System.out.println("Inline error check failed: " + e.getMessage());
