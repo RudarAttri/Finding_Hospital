@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<!--
+    ============================================================
+       MASTER SUITE — Runs TestNG + Cucumber suites in parallel
+    ============================================================
+
+    parallel="tests" at suite level → both <test> blocks run AT THE
+    SAME TIME in separate threads.
+
+    Inside each <test>:
+      • TestNGTests   uses parallel="methods" thread-count="4"
+                      → 4 Excel rows run simultaneously
+      • CucumberTests runs sequentially (default Cucumber behavior)
+
+    Total execution time = max(TestNG time, Cucumber time)
+    instead of TestNG time + Cucumber time
+-->
+<suite name="MasterSuite" verbose="2" parallel="tests" thread-count="2">
+
+    <!-- ── Listeners — only attach to TestNG block, not Cucumber ──────────── -->
+    <!-- (Cucumber generates its own HTML/JSON reports separately)            -->
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         TestNG block — Corporate Wellness data-driven tests
+         ════════════════════════════════════════════════════════════════════ -->
+    <test name="TestNGTests"
+          parallel="methods"
+          thread-count="4"
+          data-provider-thread-count="4">
+
+        <listeners>
+            <listener class-name="utilities.ExtentTestListener"/>
+        </listeners>
+
+        <classes>
+            <class name="org.example.CorporateWellnessTest">
+                <methods>
+                    <include name="testCorporateWellnessRegistration"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         Cucumber block — BDD scenarios (hospitals + doctors)
+         ════════════════════════════════════════════════════════════════════ -->
+    <test name="CucumberTests">
+        <classes>
+            <class name="testRunner.TestRunner"/>
+        </classes>
+    </test>
+
+</suite>

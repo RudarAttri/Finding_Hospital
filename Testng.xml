@@ -7,12 +7,21 @@
     Writes status back into: same Excel (ActualStatus column)
     Generates Extent HTML  : Reports/Extent/ExtentReport_*.html
 
+    ★ PARALLEL EXECUTION ENABLED ★
+      • parallel="methods"               → run test methods in parallel
+      • thread-count="4"                 → 4 simultaneous threads
+      • data-provider-thread-count="4"   → 4 DataProvider rows run at once
+
     Coexists with the BDD/Cucumber framework:
       • Cucumber tests run via TestRunner.java (untouched)
-      • TestNG tests run via this Testng.xml
+      • TestNG tests run via this Testng.xml (PARALLEL)
       • Both use the same DriverFactory (ThreadLocal) — no conflict
 -->
-<suite name="CorporateWellnessSuite" verbose="2">
+<suite name="CorporateWellnessSuite"
+       verbose="2"
+       parallel="methods"
+       thread-count="6"
+       data-provider-thread-count="6">
 
     <!-- ── Listeners — activates ExtentReports automatically ──────────────── -->
     <listeners>

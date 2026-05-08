@@ -11,6 +11,12 @@ import utilities.ScreenshotHelper;
 /**
  * TestNG data-driven test for the Corporate Wellness "Schedule a Demo" form.
  *
+ * ★ PARALLEL EXECUTION ENABLED ★
+ *   - DataProvider has parallel = true → rows run in parallel threads
+ *   - Each thread gets its own WebDriver via ThreadLocal in DriverFactory
+ *   - Each thread gets its own ExtentTest via ThreadLocal in listener
+ *   - ExcelUtils write methods are already synchronized (thread-safe)
+ *
  * STRATEGY:
  *   The submit button itself is the source of truth.
  *   Practo's form keeps the button DISABLED until all fields are valid.
@@ -28,7 +34,11 @@ import utilities.ScreenshotHelper;
  */
 public class CorporateWellnessTest {
 
-    private CorporateWellnessPage wellnessPage;
+    // ⚠ NOTE: wellnessPage is now a LOCAL variable inside the test method
+    //   instead of an instance field. Why?
+    //   When parallel="methods" runs, multiple threads share the SAME instance
+    //   of CorporateWellnessTest. An instance field would be overwritten by
+    //   other threads. Local variables are stack-based and thread-safe.
 
     private static final String EXCEL_PATH = "TestData/CorporateWellnessData.xlsx";
     private static final String SHEET_NAME = "Registration";
@@ -37,7 +47,8 @@ public class CorporateWellnessTest {
 
     private final ExcelUtils excel = new ExcelUtils(EXCEL_PATH, SHEET_NAME);
 
-    @DataProvider(name = "registrationData")
+    // ★ parallel = true → tells TestNG these data rows can run concurrently
+    @DataProvider(name = "registrationData", parallel = true)
     public Object[][] getRegistrationData() throws Exception {
         return excel.getSheetData();
     }
@@ -45,7 +56,6 @@ public class CorporateWellnessTest {
     @BeforeMethod
     public void setUp() {
         DriverFactory.initDriver();
-        wellnessPage = new CorporateWellnessPage();
     }
 
     @AfterMethod
@@ -66,8 +76,12 @@ public class CorporateWellnessTest {
             String expectedResult,
             String actualStatusIgnored) {
 
+        // ★ LOCAL variable — safe in parallel execution
+        CorporateWellnessPage wellnessPage = new CorporateWellnessPage();
+
         System.out.println("\n========================================");
-        System.out.println(testId + " | Type: " + testType
+        System.out.println("[Thread " + Thread.currentThread().getId() + "] "
+                + testId + " | Type: " + testType
                 + " | Expected: " + expectedResult);
         System.out.println("Data → name='" + name + "' | email='" + email
                 + "' | phone='" + phone + "' | company='" + company

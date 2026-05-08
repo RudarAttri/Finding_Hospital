@@ -1,10 +1,33 @@
 package testRunner;
 
-import io.cucumber.junit.Cucumber;
-import io.cucumber.junit.CucumberOptions;
-import org.junit.runner.RunWith;
+import io.cucumber.testng.AbstractTestNGCucumberTests;
+import io.cucumber.testng.CucumberOptions;
 
-@RunWith(Cucumber.class)
+/**
+ * Cucumber Runner — migrated from JUnit to TestNG.
+ *
+ * ★ WHAT CHANGED ★
+ *   OLD: @RunWith(Cucumber.class) + io.cucumber.junit.* imports
+ *   NEW: extends AbstractTestNGCucumberTests + io.cucumber.testng.* imports
+ *
+ * ★ WHAT DID NOT CHANGE ★
+ *   • All @CucumberOptions content (features, glue, plugins, tags) — IDENTICAL
+ *   • Hooks.java                                                    — unchanged
+ *   • Step definitions                                              — unchanged
+ *   • Feature files                                                 — unchanged
+ *   • DriverFactory                                                 — unchanged
+ *   • Cucumber's internal scenario flow                             — unchanged
+ *
+ * ★ WHY THIS MIGRATION ★
+ *   So this runner can be included in a TestNG suite XML
+ *   (MasterSuite.xml) alongside our regular TestNG tests.
+ *   This lets BOTH suites run in parallel through a single TestNG
+ *   entry point instead of two separate Maven commands.
+ *
+ * ★ HOW TO RUN ★
+ *   • Standalone (this class only):   right-click → Run 'TestRunner'
+ *   • Together with TestNG tests:     run MasterSuite.xml
+ */
 @CucumberOptions(
 
         // ✅ List feature files EXPLICITLY in the order you want them to execute:
@@ -32,6 +55,8 @@ import org.junit.runner.RunWith;
         // ✅ Include both @hospitals and @doctors so both scenarios execute
         tags = "@hospitals or @doctors"
 )
-public class TestRunner {
-        // Intentionally empty — JUnit uses this class as the Cucumber entry point.
+public class TestRunner extends AbstractTestNGCucumberTests {
+        // Intentionally empty — TestNG uses this class as the Cucumber entry point.
+        // Inherits scenarios() @DataProvider and runScenario() @Test
+        // from AbstractTestNGCucumberTests.
 }

@@ -13,16 +13,27 @@ import java.util.Date;
  * Singleton manager for ExtentReports.
  * Generates a timestamped HTML report under: Reports/Extent/
  *
+ * ★ THREAD-SAFE for parallel execution ★
+ *   Uses synchronized double-checked locking so that when multiple
+ *   parallel threads start at the same time, only ONE ExtentReports
+ *   instance is created (and ONE timestamped HTML file).
+ *
  * Place under: src/test/java/utilities/ExtentReportManager.java
  */
 public class ExtentReportManager {
 
-    private static ExtentReports extent;
+    private static volatile ExtentReports extent;   // volatile for thread visibility
     private static String reportPath;
+    private static final Object LOCK = new Object();
 
     public static ExtentReports getInstance() {
+        // Double-checked locking — fast path when already created
         if (extent == null) {
-            createInstance();
+            synchronized (LOCK) {
+                if (extent == null) {
+                    createInstance();
+                }
+            }
         }
         return extent;
     }
@@ -52,7 +63,7 @@ public class ExtentReportManager {
         extent.setSystemInfo("Project",      "Finding_Hospital");
         extent.setSystemInfo("Application",  "Practo");
         extent.setSystemInfo("Module",       "Corporate Wellness Form");
-        extent.setSystemInfo("Test Framework", "TestNG + Apache POI");
+        extent.setSystemInfo("Test Framework", "TestNG + Apache POI (Parallel)");
         extent.setSystemInfo("Browser",      "Chrome");
         extent.setSystemInfo("OS",           System.getProperty("os.name"));
         extent.setSystemInfo("Java Version", System.getProperty("java.version"));
@@ -66,7 +77,7 @@ public class ExtentReportManager {
     }
 
     /** Flushes and closes the report — must be called at end of suite. */
-    public static void flush() {
+    public static synchronized void flush() {
         if (extent != null) {
             extent.flush();
             System.out.println("Extent report saved at: " + reportPath);
