@@ -7,10 +7,14 @@
     Writes status back into: same Excel (ActualStatus column)
     Generates Extent HTML  : Reports/Extent/ExtentReport_*.html
 
-    ★ PARALLEL EXECUTION ENABLED ★
+    ★ EXECUTION ORDER ★
+      1. CorporateWellnessBDDTests      → Cucumber BDD runs FIRST  (sequential)
+      2. CorporateWellnessRegistrationTests → TestNG runs SECOND (parallel)
+
+    ★ PARALLEL EXECUTION (TestNG block only) ★
       • parallel="methods"               → run test methods in parallel
-      • thread-count="4"                 → 4 simultaneous threads
-      • data-provider-thread-count="4"   → 4 DataProvider rows run at once
+      • thread-count="6"                 → 6 simultaneous threads
+      • data-provider-thread-count="6"   → 6 DataProvider rows run at once
 
     Coexists with the BDD/Cucumber framework:
       • Cucumber tests run via TestRunner.java (untouched)
@@ -19,16 +23,31 @@
 -->
 <suite name="CorporateWellnessSuite"
        verbose="2"
-       parallel="methods"
-       thread-count="6"
-       data-provider-thread-count="6">
+       preserve-order="true">
+
+    <!--
+        ⚠️ parallel and thread-count are moved from <suite> level
+           to <test> level — so ONLY the TestNG block runs in parallel.
+           BDD block stays sequential to avoid Cucumber thread conflicts.
+    -->
 
     <!-- ── Listeners — activates ExtentReports automatically ──────────────── -->
     <listeners>
         <listener class-name="utilities.ExtentTestListener"/>
     </listeners>
 
-    <test name="CorporateWellnessRegistrationTests">
+
+    <test name="CorporateWellnessBDDTests"
+          preserve-order="true">
+        <classes>
+            <class name="testRunner.TestRunner"/>
+        </classes>
+    </test>
+
+
+    <test name="CorporateWellnessRegistrationTests"
+          parallel="methods"
+          thread-count="6">
         <classes>
             <class name="org.example.CorporateWellnessTest">
                 <methods>

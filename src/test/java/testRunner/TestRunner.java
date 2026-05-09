@@ -34,8 +34,8 @@ import io.cucumber.testng.CucumberOptions;
         //    1. hospitals.feature  → runs FIRST  (browser opens, runs, browser CLOSES)
         //    2. doctors.feature    → runs SECOND (fresh browser opens, runs, browser CLOSES)
         features = {
-                "Features/hospitals.feature",
-                "Features/doctors.feature"
+                "Features/1_hospitals.feature",
+                "Features/2_doctors.feature"
         },
 
         // Packages containing step definitions and hooks
