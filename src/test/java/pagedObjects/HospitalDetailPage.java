@@ -5,11 +5,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import utilities.WaitHelper;
 import java.util.List;
-
-/**
- * Page Object for an individual Hospital Detail Page on Practo.
- * Extracts: rating, Open 24x7 status, parking facility availability.
- */
 public class HospitalDetailPage extends BasePage {
 
     // ── Locators ──────────────────────────────────────────────────────

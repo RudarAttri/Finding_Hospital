@@ -7,10 +7,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-/**
- * Apache POI utility — READS test data + WRITES back actual status.
- * Robust version with retry logic for file-lock issues.
- */
 public class ExcelUtils {
 
     private final String filePath;

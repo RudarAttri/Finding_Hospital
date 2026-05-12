@@ -6,9 +6,7 @@ import utilities.WaitHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Page Object for the Practo Hospital Listing / Search Results page.
- */
+
 public class HospitalListingPage extends BasePage {
 
     // ── Locators ──────────────────────────────────────────────────────
@@ -27,9 +25,7 @@ public class HospitalListingPage extends BasePage {
         System.out.println("Hospital listing page loaded.");
     }
 
-    /**
-     * Collects up to 'limit' hospital entries as String[]{name, url}.
-     */
+
     public List<String[]> collectHospitalLinks(int limit) {
         List<WebElement> items     = driver.findElements(HOSPITAL_ITEMS);
         List<String[]>   collected = new ArrayList<>();

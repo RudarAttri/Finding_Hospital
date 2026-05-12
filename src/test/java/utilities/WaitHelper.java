@@ -8,10 +8,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 
-/**
- * Centralised explicit-wait and JS helper methods.
- * All page objects call these instead of duplicating wait logic.
- */
+
 public class WaitHelper {
 
     private static final int TIMEOUT = 20;

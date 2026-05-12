@@ -8,11 +8,6 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import utilities.WaitHelper;
 import java.time.Duration;
-
-/**
- * Parent class for all Page Objects.
- * Runs PageFactory.initElements and exposes shared helpers.
- */
 public class BasePage {
 
     protected WebDriver          driver;

@@ -8,15 +8,6 @@ import org.openqa.selenium.support.ui.Select;
 import utilities.WaitHelper;
 import java.util.List;
 
-/**
- * Page Object for the Practo Corporate Wellness "Schedule a Demo" page.
- *
- * Form behavior:
- *   • VALID data   → Submit button enabled → click → reCAPTCHA → success message
- *   • INVALID data → Submit button stays DISABLED → no click possible
- *
- * Important: reCAPTCHA iframe must NOT be confused with success popup.
- */
 public class CorporateWellnessPage extends BasePage {
 
     // ── Homepage navigation ──────────────────────────────────────────────────
@@ -196,9 +187,6 @@ public class CorporateWellnessPage extends BasePage {
         sleep(2500);
     }
 
-    /**
-     * Returns true if Schedule button is enabled (form is valid).
-     */
     public boolean isScheduleButtonEnabled() {
         try {
             WaitHelper.waitForVisibilityOfElement(scheduleButton);
@@ -223,11 +211,6 @@ public class CorporateWellnessPage extends BasePage {
             return false;
         }
     }
-
-    /**
-     * Returns true ONLY if a real success/thank-you message is shown.
-     * Explicitly excludes reCAPTCHA iframes and elements.
-     */
     public boolean isSuccessMessageDisplayed() {
         sleep(2000); // give page time to render
 
@@ -311,7 +294,6 @@ public class CorporateWellnessPage extends BasePage {
             }
         } catch (Exception e) {
             System.out.println("Inline error check failed: " + e.getMessage());
-        }
-        return "No error message found";
+        }       return "No error message found";
     }
 }

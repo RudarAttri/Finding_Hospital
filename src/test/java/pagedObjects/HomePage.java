@@ -4,11 +4,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import utilities.WaitHelper;
 
-/**
- * Page Object for Practo Home Page.
- * Covers: location input, keyword search input, auto-suggestion clicks,
- * and navigation to Diagnostics / Corporate Wellness.
- */
 public class HomePage extends BasePage {
 
     // ── Locators ──────────────────────────────────────────────────────

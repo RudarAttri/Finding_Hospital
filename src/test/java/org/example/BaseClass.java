@@ -7,10 +7,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 
-/**
- * Static driver bootstrap kept for reference.
- * The live framework uses DriverFactory (ThreadLocal).
- */
+
 public class BaseClass {
 
     protected static WebDriver driver;

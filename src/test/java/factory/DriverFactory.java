@@ -8,10 +8,7 @@ public class DriverFactory {
 
     private static final ThreadLocal<WebDriver> tlDriver = new ThreadLocal<>();
 
-    /**
-     * Initialises a ChromeDriver and stores it in ThreadLocal.
-     * Called once per scenario via Hooks @Before.
-     */
+
     public static WebDriver initDriver() {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--start-maximized");

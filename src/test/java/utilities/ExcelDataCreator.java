@@ -6,18 +6,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.*;
 import java.nio.file.*;
 
-/**
- * Run this once to generate TestData/CorporateWellnessData.xlsx
- * with one valid row and one invalid row.
- *
- * Columns (0-indexed):
- *   0 = Name
- *   1 = OrganizationName
- *   2 = ContactNumber
- *   3 = Email
- *   4 = OrganizationSizeDropdownIndex   (1 = first real option)
- *   5 = InterestedInDropdownIndex       (1 = first real option)
- */
+
 public class ExcelDataCreator {
 
     public static void main(String[] args) throws IOException {

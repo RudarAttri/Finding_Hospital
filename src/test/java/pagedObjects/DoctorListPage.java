@@ -17,9 +17,6 @@ public class DoctorListPage {
     private WebDriver driver;
     private JavascriptExecutor js;
 
-    // -----------------------------------------------------------------------
-    // Locators — all verified from DevTools screenshots
-    // -----------------------------------------------------------------------
 
     // "Find Doctors Near You" card on home page
     private final By findDoctorsCard     = By.cssSelector("a[aria-label='Find Doctors Near You']");
@@ -76,12 +73,6 @@ public class DoctorListPage {
         return driver.getCurrentUrl().contains("/doctors");
     }
 
-    /**
-     * Full search flow:
-     * A. Type "Bangalore" in location box → click suggestion
-     * B. Type speciality in keyword box char by char → click matching suggestion
-     * C. Click Search button
-     */
     public void searchAndSubmit(String speciality) {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
 
@@ -163,20 +154,6 @@ public class DoctorListPage {
         return true;
     }
 
-    /**
-     * ✅ Scrolls to each of the top N doctor cards using JS executor,
-     * then extracts name and experience from each card.
-     *
-     * Experience structure from DevTools Image 3:
-     *   <div data-qa-id="doctor_experience">
-     *     25          ← plain text node (the number)
-     *     <span>years experience overall</span>
-     *   </div>
-     * We read the full textContent via JS to get the combined text.
-     *
-     * @param topN number of doctors to collect
-     * @return list of String[2] — { name, experience }
-     */
     public List<String[]> collectTopDoctors(int topN) {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
         wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(doctorCards));

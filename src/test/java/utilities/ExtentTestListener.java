@@ -19,15 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 
-/**
- * TestNG Listener — automatically logs every test to ExtentReports.
- * Place under: src/test/java/utilities/ExtentTestListener.java
- *
- * Wire it up in Testng.xml with:
- *   <listeners>
- *     <listener class-name="utilities.ExtentTestListener"/>
- *   </listeners>
- */
+
 public class ExtentTestListener implements ITestListener, ISuiteListener {
 
     private static final ThreadLocal<ExtentTest> tlTest = new ThreadLocal<>();

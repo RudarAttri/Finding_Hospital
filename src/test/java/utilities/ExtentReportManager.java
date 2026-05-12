@@ -9,17 +9,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-/**
- * Singleton manager for ExtentReports.
- * Generates a timestamped HTML report under: Reports/Extent/
- *
- * ★ THREAD-SAFE for parallel execution ★
- *   Uses synchronized double-checked locking so that when multiple
- *   parallel threads start at the same time, only ONE ExtentReports
- *   instance is created (and ONE timestamped HTML file).
- *
- * Place under: src/test/java/utilities/ExtentReportManager.java
- */
+
 public class ExtentReportManager {
 
     private static volatile ExtentReports extent;   // volatile for thread visibility

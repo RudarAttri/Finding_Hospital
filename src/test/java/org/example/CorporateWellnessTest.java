@@ -8,37 +8,9 @@ import pagedObjects.CorporateWellnessPage;
 import utilities.ExcelUtils;
 import utilities.ScreenshotHelper;
 
-/**
- * TestNG data-driven test for the Corporate Wellness "Schedule a Demo" form.
- *
- * ★ PARALLEL EXECUTION ENABLED ★
- *   - DataProvider has parallel = true → rows run in parallel threads
- *   - Each thread gets its own WebDriver via ThreadLocal in DriverFactory
- *   - Each thread gets its own ExtentTest via ThreadLocal in listener
- *   - ExcelUtils write methods are already synchronized (thread-safe)
- *
- * STRATEGY:
- *   The submit button itself is the source of truth.
- *   Practo's form keeps the button DISABLED until all fields are valid.
- *
- *   • VALID data   → button gets enabled by the form's own validation
- *   • INVALID data → button stays disabled
- *
- *   We do NOT click the button or look for popups, because:
- *     - reCAPTCHA appears after click and confuses success detection
- *     - Form validation on the button is the most reliable signal
- *
- * ActualStatus convention:
- *   PASS = button enabled (form considered the data valid)
- *   FAIL = button disabled (form considered the data invalid)
- */
+
 public class CorporateWellnessTest {
 
-    // ⚠ NOTE: wellnessPage is now a LOCAL variable inside the test method
-    //   instead of an instance field. Why?
-    //   When parallel="methods" runs, multiple threads share the SAME instance
-    //   of CorporateWellnessTest. An instance field would be overwritten by
-    //   other threads. Local variables are stack-based and thread-safe.
 
     private static final String EXCEL_PATH = "TestData/CorporateWellnessData.xlsx";
     private static final String SHEET_NAME = "Registration";
@@ -47,7 +19,7 @@ public class CorporateWellnessTest {
 
     private final ExcelUtils excel = new ExcelUtils(EXCEL_PATH, SHEET_NAME);
 
-    // ★ parallel = true → tells TestNG these data rows can run concurrently
+
     @DataProvider(name = "registrationData", parallel = true)
     public Object[][] getRegistrationData() throws Exception {
         return excel.getSheetData();
